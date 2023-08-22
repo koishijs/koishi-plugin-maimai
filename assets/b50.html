@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        @font-face {
+            font-family: TT-Shin-Go;
+            src: url(./fonts/sgm.ttf);
+        }
+
+        @font-face {
+            font-family: Impact;
+            src: url(./fonts/impact.ttf);
+        }
+
+        @font-face {
+            font-family: Yuan;
+            src: url(./fonts/TTZhongYuanGB3.ttf);
+        }
+
+        body {
+            background: #eee;
+            padding: 18px;
+        }
+
+        html,
+        body {
+            margin: 0;
+            width: fit-content;
+        }
+
+        p {
+            margin: 0;
+            font-family: 'TT-Shin-Go';
+        }
+
+        #app {
+            height: 1430px;
+            width: 1310px;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .card {
+            position: relative;
+            background-position: center;
+            background-size: cover;
+            width: 200px;
+            height: 120px;
+            box-shadow: 2px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .rank {
+            top: -12px;
+            left: -5px;
+            font-family: Impact;
+            font-size: 24px;
+            -webkit-text-stroke: 1px #fff;
+        }
+
+        .song-title {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            top: 16px;
+            left: 10px;
+            width: calc(200px - 2 * 10px);
+            font-size: 18px;
+        }
+
+        .cover-mask {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            background: #ffffff80;
+            z-index: 0;
+        }
+
+        .card p,
+        .card img {
+            z-index: 100;
+        }
+
+        .card * {
+            position: absolute
+        }
+
+        .text-shadow {
+            text-shadow: 2px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .achievements {
+            top: 40px;
+            left: 10px;
+            font-size: 16px;
+        }
+
+        .rate {
+            top: 62px;
+            left: 10px;
+            font-size: 20px;
+            text-transform: uppercase;
+        }
+
+        .level {
+            top: 92px;
+            left: 10px;
+            font-size: 14px;
+        }
+
+        .card img {
+            width: 72px;
+            height: 24px;
+            top: -12px;
+            left: 130px;
+        }
+
+        .container {
+            margin-top: 15px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            row-gap: calc(135px - 120px);
+            width: 1050px;
+        }
+        .info {
+            position: absolute;
+            max-width: 190px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <p style="margin-top: 10px;">B30</p>
+        <div class="container">
+            <div v-for="(v,i) in resp.charts.sd" class="card"
+                :style="{backgroundImage: `url('${assetBase}maimaidx/data/covers-df/${getCoverPathById(v.song_id)}')`}">
+                <img :src="v.type === 'DX' ? './UI_TTR_Infoicon_DeluxeMode.png' : './UI_TTR_Infoicon_StandardMode.png'" />
+                <div class="cover-mask"></div>
+                <p class="rank text-shadow">#{{i+1}} - {{v.ra}}</p>
+                <p class="song-title">{{v.title}}</p>
+                <p class="achievements">{{v.achievements}}%</p>
+                <p class="rate">{{v.rate}} {{v.fc}} {{v.fs}}</p>
+                <p style="text-shadow: 1px 1px black" class="level text-shadow" :style="{color: DIFF_COLORS[v.level_index]}">{{v.level_label}} {{v.ds}}
+                </p>
+            </div>
+        </div>
+        <p style="margin-top: 10px;">B15</p>
+        <div class="container">
+            <div v-for="(v,i) in resp.charts.dx" class="card"
+            :style="{backgroundImage: `url('${assetBase}maimaidx/data/covers-df/${getCoverPathById(v.song_id)}')`}">
+                <img :src="v.type === 'DX' ? './UI_TTR_Infoicon_DeluxeMode.png' : './UI_TTR_Infoicon_StandardMode.png'" />
+                <div class="cover-mask"></div>
+                <p class="rank text-shadow">#{{i+1}} - {{v.ra}}</p>
+                <p class="song-title">{{v.title}}</p>
+                <p class="achievements">{{v.achievements}}%</p>
+                <p class="rate">{{v.rate}} {{v.fc}} {{v.fs}}</p>
+                <p style="text-shadow: 1px 1px black" class="level text-shadow" :style="{color: DIFF_COLORS[v.level_index]}">{{v.level_label}} {{v.ds}}
+                </p>
+            </div>
+        </div>
+        <p class="info" style="left: 1090px; top: 40px">RATING DETAIL OF</p>
+        <p class="info" style="font-size: 32px;left: 1090px; top: 65px">{{resp.nickname}}</p>
+        <p class="info" style="left: 1090px; top: 120px">RATING</p>
+        <p class="info" style="font-size: 32px;left: 1090px; top: 140px">{{resp.rating}}</p>
+    </div>
+    <script type="importmap">
+        {
+            "imports": {
+                "vue":"https://cdn.jsdelivr.net/npm/vue@3.3.4/dist/vue.esm-browser.prod.js"
+            }
+        }
+    </script>
+    <script type="module">
+        import { createApp, ref } from 'vue'
+
+        window.app = createApp({
+            methods: {
+                getCoverPathById(i) {
+                    if (i > 10000 && i <= 11000) i -= 10000;
+                    return (i + "").padStart(5, '0') + ".png";
+                }
+            },
+            data: () => ({
+                assetBase: '',
+                resp: null
+            }),
+            setup() {
+                return {
+                    DIFF_COLORS: ['rgb(69, 193, 36)', 'rgb(255, 186, 1)', 'rgb(255, 90, 102)', 'rgb(134, 49, 200)', 'rgb(217, 197, 233)']}
+            }
+        }).mount('#app')
+    </script>
+</body>
+
+</html>

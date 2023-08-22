@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    @font-face {
+        font-family: TT-Shin-Go;
+        src: url(./fonts/sgm.ttf);
+      }
+      @font-face {
+        font-family: Impact;
+        src: url(./fonts/impact.ttf);
+      }
+      @font-face {
+        font-family: Yuan;
+        src: url(./fonts/TTZhongYuanGB3.ttf);
+      }
+    body {background: #eee; padding: 18px;}
+    html, body {margin: 0; width: fit-content;}
+    p {margin: 0;}
+
+      #search-result {
+        font-family: Yuan;
+        font-weight: 800;
+        font-size: 24px;
+        max-width: 610px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+      .search-list {
+        margin-top: 16px;
+      }
+      p {margin: 0;}
+      .search-card {
+        position: relative;
+        background: white;
+        font-family: TT-Shin-Go;
+        display: flex;
+        width: 610px;
+        height: 160px;
+        box-shadow: 2px 2px rgba(0, 0, 0, 0.2);
+        margin-bottom: 10px;
+        margin-right: 10px;
+        /* flex: 50%; */
+      }
+      .search-card .cover img {
+        height: 160px;
+        min-width: 160px;
+      }
+      .search-card main {
+        overflow: hidden;
+        margin-left: 20px;
+      }
+      .search-card .title, .content {
+        white-space: nowrap;
+      }
+      .search-card .title {
+        padding-top: 16px;
+        line-height: 24px;
+        vertical-align: middle;
+        font-size: 24px;
+        padding-bottom: 8px;
+      }
+      .search-card .content {
+        padding: 4px 0;
+        font-size: 18px;
+      }
+      .id {
+        position: absolute;
+        left: 10px; bottom: 10px;
+        color: white;
+        font-size: 14px;
+      }
+      .charts {margin-top: 25px;}
+      .charts * {
+        margin-right: 5px;
+        width: 70px;
+        height: 24px;
+        display: inline-block;
+        text-align: center;
+        vertical-align: middle;
+        line-height: 24px;
+        color: white;
+      }
+      .type-icon {
+        position: absolute;
+        height: 24px;
+        top: 5px; left: 5px;
+      }
+      
+      .basic, .charts span:nth-child(1) {background: rgb(69, 193, 36);}
+      .advanced, .charts span:nth-child(2) {background: rgb(255, 186, 1);}
+      .expert, .charts span:nth-child(3) {background: rgb(255, 90, 102);}
+      .master, .charts span:nth-child(4) {background: rgb(134, 49, 200);}
+      .remaster, .charts span:nth-child(5) {background: rgb(217, 197, 233);}
+      .text-shadow {text-shadow: 2px 2px rgba(0, 0, 0, 0.2);}
+  </style>
+</head>
+<body>
+  <p id="search-result">SEARCH RESULT OF <span></span></h1>
+  <div class="search-list">
+  </div>
+</body>
+</html>
