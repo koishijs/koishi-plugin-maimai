@@ -107,45 +107,6 @@ export namespace DivingFish.MaimaiDX {
         };
     }
 
-    let _musicDataCache: Music[] | undefined = undefined;
-
-    export async function musicInfo(http: Quester): Promise<Music[]> {
-        while (!_musicDataCache) {
-            const response = await http.get(`/api/maimaidxprober/music_data`);
-            _musicDataCache = response;
-        }
-
-        return _musicDataCache;
-    }
-
-    export async function b40(http: Quester, qq: string, username?: string): Promise<UserBest40> {
-        const response = await http.post(`/api/maimaidxprober/query/player`, username ? { username, b50: true } : { qq, b50: true }, {
-            headers: {
-                'content-type': 'application/json'
-            },
-        });
-
-        return response;
-    }
-
-    export async function dev(http: Quester, developer_token: string, username?: string): Promise<{
-        username: string
-        records: Chart[]
-        additional_rating: number
-    }> {
-        const response = await http.get(`/api/maimaidxprober/dev/player/records`, {
-            params: {
-                username
-            },
-            headers: {
-                'content-type': 'application/json',
-                'developer-token': developer_token
-            },
-        });
-
-        return response;
-    }
-
     export function getCoverPathById(i: number) {
         if (i > 10000 && i <= 11000) i -= 10000;
         return (i + "").padStart(5, '0') + ".png";

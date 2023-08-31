@@ -125,47 +125,54 @@
             row-gap: calc(135px - 120px);
             width: 1050px;
         }
+
         .info {
             position: absolute;
-            max-width: 190px;
+            /* max-width: 190px; */
         }
     </style>
 </head>
 
 <body>
     <div id="app">
-        <p style="margin-top: 10px;">B30</p>
-        <div class="container">
+        <p style="margin-top: 10px;">B35</p>
+        <div class="container" v-if="resp?.charts?.sd">
             <div v-for="(v,i) in resp.charts.sd" class="card"
                 :style="{backgroundImage: `url('${assetBase}maimaidx/data/covers-df/${getCoverPathById(v.song_id)}')`}">
-                <img :src="v.type === 'DX' ? './UI_TTR_Infoicon_DeluxeMode.png' : './UI_TTR_Infoicon_StandardMode.png'" />
+                <img
+                    :src="v.type === 'DX' ? './UI_TTR_Infoicon_DeluxeMode.png' : './UI_TTR_Infoicon_StandardMode.png'" />
                 <div class="cover-mask"></div>
                 <p class="rank text-shadow">#{{i+1}} - {{v.ra}}</p>
                 <p class="song-title">{{v.title}}</p>
                 <p class="achievements">{{v.achievements}}%</p>
                 <p class="rate">{{v.rate}} {{v.fc}} {{v.fs}}</p>
-                <p style="text-shadow: 1px 1px black" class="level text-shadow" :style="{color: DIFF_COLORS[v.level_index]}">{{v.level_label}} {{v.ds}}
+                <p style="text-shadow: 1px 1px black" class="level text-shadow"
+                    :style="{color: DIFF_COLORS[v.level_index]}">{{v.level_label}} {{v.ds}}
                 </p>
             </div>
         </div>
         <p style="margin-top: 10px;">B15</p>
-        <div class="container">
+        <div class="container" v-if="resp?.charts?.dx">
             <div v-for="(v,i) in resp.charts.dx" class="card"
-            :style="{backgroundImage: `url('${assetBase}maimaidx/data/covers-df/${getCoverPathById(v.song_id)}')`}">
-                <img :src="v.type === 'DX' ? './UI_TTR_Infoicon_DeluxeMode.png' : './UI_TTR_Infoicon_StandardMode.png'" />
+                :style="{backgroundImage: `url('${assetBase}maimaidx/data/covers-df/${getCoverPathById(v.song_id)}')`}">
+                <img
+                    :src="v.type === 'DX' ? './UI_TTR_Infoicon_DeluxeMode.png' : './UI_TTR_Infoicon_StandardMode.png'" />
                 <div class="cover-mask"></div>
                 <p class="rank text-shadow">#{{i+1}} - {{v.ra}}</p>
                 <p class="song-title">{{v.title}}</p>
                 <p class="achievements">{{v.achievements}}%</p>
                 <p class="rate">{{v.rate}} {{v.fc}} {{v.fs}}</p>
-                <p style="text-shadow: 1px 1px black" class="level text-shadow" :style="{color: DIFF_COLORS[v.level_index]}">{{v.level_label}} {{v.ds}}
+                <p style="text-shadow: 1px 1px black" class="level text-shadow"
+                    :style="{color: DIFF_COLORS[v.level_index]}">{{v.level_label}} {{v.ds}}
                 </p>
             </div>
         </div>
         <p class="info" style="left: 1090px; top: 40px">RATING DETAIL OF</p>
-        <p class="info" style="font-size: 32px;left: 1090px; top: 65px">{{resp.nickname}}</p>
+        <p class="info" style="font-size: 32px;left: 1090px; top: 65px">{{resp?.nickname}}</p>
         <p class="info" style="left: 1090px; top: 120px">RATING</p>
-        <p class="info" style="font-size: 32px;left: 1090px; top: 140px">{{resp.rating}}</p>
+        <p class="info" style="font-size: 32px;left: 1090px; top: 140px">{{resp?.rating}}</p>
+        <p class="info" style="left: 1090px; top: 1330px">DATA FROM</p>
+        <p class="info" style="font-size: 28px;left: 1090px; top: 1355px">{{dataFrom}}</p>
     </div>
     <script type="importmap">
         {
@@ -186,11 +193,13 @@
             },
             data: () => ({
                 assetBase: '',
-                resp: null
+                resp: null,
+                dataFrom: ''
             }),
             setup() {
                 return {
-                    DIFF_COLORS: ['rgb(69, 193, 36)', 'rgb(255, 186, 1)', 'rgb(255, 90, 102)', 'rgb(134, 49, 200)', 'rgb(217, 197, 233)']}
+                    DIFF_COLORS: ['rgb(69, 193, 36)', 'rgb(255, 186, 1)', 'rgb(255, 90, 102)', 'rgb(134, 49, 200)', 'rgb(217, 197, 233)']
+                }
             }
         }).mount('#app')
     </script>
