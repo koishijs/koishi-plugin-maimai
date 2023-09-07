@@ -2,7 +2,6 @@ import { Context, Logger, Quester, Schema, Service, h, segment } from 'koishi'
 import type { } from 'koishi-plugin-puppeteer'
 import type { } from '@koishijs/plugin-help'
 import { DivingFish, Zetaraku } from './api';
-// import { MaimaiImageDrawer } from './drawing';
 import dedent from "dedent";
 import { resolve } from 'path';
 import { uniq, sortBy } from 'lodash';
@@ -634,7 +633,7 @@ export async function apply(ctx: Context, config: Config) {
   }
 
   ctx.platform('onebot').command('maimaidx.nearby')
-    .shortcut('附近mai')
+    .shortcut(/附近\s*mai/)
     .action(async ({ session }) => {
       const input = await session.prompt(30000)
       const parsed = h.parse(input)
