@@ -4,12 +4,11 @@ import type { } from '@koishijs/plugin-help'
 import { DivingFish, Zetaraku } from './api';
 import dedent from "dedent";
 import { resolve } from 'path';
-import { uniq, sortBy } from 'lodash';
+import { uniq } from 'lodash';
 import { mkdir, readFile, writeFile } from 'fs/promises';
 import { existsSync } from 'fs';
 
 import koaSend from 'koa-send';
-import { OnebotMap } from './types';
 export const name = 'maimai'
 export * from './api'
 
@@ -614,73 +613,4 @@ export async function apply(ctx: Context, config: Config) {
     //   })
 
   })
-
-  function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-    var radius = 6371; // km     
-
-    //convert latitude and longitude to radians
-    const deltaLatitude = (lat2 - lat1) * Math.PI / 180;
-    const deltaLongitude = (lon2 - lon1) * Math.PI / 180;
-
-    const halfChordLength = Math.cos(
-      lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180)
-      * Math.sin(deltaLongitude / 2) * Math.sin(deltaLongitude / 2)
-      + Math.sin(deltaLatitude / 2) * Math.sin(deltaLatitude / 2);
-
-    const angularDistance = 2 * Math.atan2(Math.sqrt(halfChordLength), Math.sqrt(1 - halfChordLength));
-
-    return radius * angularDistance;
-  }
-
-  ctx.platform('onebot').command('maimaidx.nearby')
-    .shortcut(/附近\s*mai/)
-    .action(async ({ session }) => {
-      const input = await session.prompt(30000)
-      const parsed = h.parse(input)
-      if (!parsed?.[0]?.attrs?.data) return
-      const userLoc = JSON.parse(parsed[0].attrs.data) as OnebotMap
-      const remote = await ctx.http.get('https://map.bemanicn.com/dxmap', {
-        headers: {
-          'X-Inertia': 'true'
-        }
-      })
-      type DxMapItem = {
-        shop_id: number
-        longitude: string
-        latitude: string
-        arcadeName: string
-        machineCount: number
-        tempLnglat: string
-        address: string
-      }
-      const list: DxMapItem[] = remote.props.dxlist
-      const lat = parseFloat(userLoc.meta["Location.Search"].lat);
-      const lng = parseFloat(userLoc.meta["Location.Search"].lng);
-      const calc = (shop: DxMapItem) => {
-        let { latitude, longitude } = shop
-        if (shop.tempLnglat) {
-          [longitude, latitude] = shop.tempLnglat.split(',')
-        }
-
-
-        return haversineDistance(
-          lat,
-          lng,
-          parseFloat(latitude),
-          parseFloat(longitude)
-        )
-      }
-      let tmp = list.map(v => ({ ...v, distance: calc(v) }))
-      let sorted = sortBy(tmp, ['distance'])
-      let mcdInfo = ""
-      try {
-        const mcd = await ctx.http.post('https://www.mcdonalds.com.cn/ajaxs/search_by_point', `point=${lat},${lng}`)
-        mcdInfo = mcd.data.slice(0, 2)?.map(v => `${v.title} ${v._distance / 1000}km`).join("\n")
-      } catch (e) {
-        logger.error(e)
-      }
-
-
-      return [sorted.slice(0, 5).map(v => `${v.arcadeName} ${v.distance.toFixed(2)}km ${v.machineCount} 台`).join('\n'), mcdInfo].join("\n")
-    })
 }
