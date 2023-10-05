@@ -128,6 +128,7 @@
 
         .info {
             position: absolute;
+            text-wrap: nowrap;
             /* max-width: 190px; */
         }
     </style>
@@ -136,43 +137,43 @@
 <body>
     <div id="app">
         <p style="margin-top: 10px;">B35</p>
-        <div class="container" v-if="resp?.charts?.sd">
-            <div v-for="(v,i) in resp.charts.sd" class="card"
-                :style="{backgroundImage: `url('${assetBase}maimaidx/data/covers-df/${getCoverPathById(v.song_id)}')`}">
+        <div class="container" v-if="resp?.standard">
+            <div v-for="(v,i) in resp.standard" class="card"
+                :style="{backgroundImage: `url('${assetBase}maimaidx/covers/${v.id}.png')`}">
                 <img
-                    :src="v.type === 'DX' ? './UI_TTR_Infoicon_DeluxeMode.png' : './UI_TTR_Infoicon_StandardMode.png'" />
+                    :src="v.type === 'dx' ? './UI_TTR_Infoicon_DeluxeMode.png' : './UI_TTR_Infoicon_StandardMode.png'" />
                 <div class="cover-mask"></div>
-                <p class="rank text-shadow">#{{i+1}} - {{v.ra}}</p>
-                <p class="song-title">{{v.title}}</p>
+                <p class="rank text-shadow">#{{i+1}} - {{Math.floor(v.dx_rating)}}</p>
+                <p class="song-title">{{v.song_name}}</p>
                 <p class="achievements">{{v.achievements}}%</p>
                 <p class="rate">{{v.rate}} {{v.fc}} {{v.fs}}</p>
                 <p style="text-shadow: 1px 1px black" class="level text-shadow"
-                    :style="{color: DIFF_COLORS[v.level_index]}">{{v.level_label}} {{v.ds}}
+                    :style="{color: DIFF_COLORS[v.level_index]}">{{LEVEL_LABELS[v.level_index]}} {{v.level}}
                 </p>
             </div>
         </div>
         <p style="margin-top: 10px;">B15</p>
-        <div class="container" v-if="resp?.charts?.dx">
-            <div v-for="(v,i) in resp.charts.dx" class="card"
-                :style="{backgroundImage: `url('${assetBase}maimaidx/data/covers-df/${getCoverPathById(v.song_id)}')`}">
+        <div class="container" v-if="resp?.dx">
+            <div v-for="(v,i) in resp.dx" class="card"
+                :style="{backgroundImage: `url('${assetBase}maimaidx/covers/${v.id}.png')`}">
                 <img
-                    :src="v.type === 'DX' ? './UI_TTR_Infoicon_DeluxeMode.png' : './UI_TTR_Infoicon_StandardMode.png'" />
+                    :src="v.type === 'dx' ? './UI_TTR_Infoicon_DeluxeMode.png' : './UI_TTR_Infoicon_StandardMode.png'" />
                 <div class="cover-mask"></div>
-                <p class="rank text-shadow">#{{i+1}} - {{v.ra}}</p>
-                <p class="song-title">{{v.title}}</p>
+                <p class="rank text-shadow">#{{i+1}} - {{Math.floor(v.dx_rating)}}</p>
+                <p class="song-title">{{v.song_name}}</p>
                 <p class="achievements">{{v.achievements}}%</p>
                 <p class="rate">{{v.rate}} {{v.fc}} {{v.fs}}</p>
                 <p style="text-shadow: 1px 1px black" class="level text-shadow"
-                    :style="{color: DIFF_COLORS[v.level_index]}">{{v.level_label}} {{v.ds}}
+                    :style="{color: DIFF_COLORS[v.level_index]}">{{LEVEL_LABELS[v.level_index]}} {{v.level}}
                 </p>
             </div>
         </div>
         <p class="info" style="left: 1090px; top: 40px">RATING DETAIL OF</p>
-        <p class="info" style="font-size: 32px;left: 1090px; top: 65px">{{resp?.nickname}}</p>
+        <p class="info" style="font-size: 32px;left: 1090px; top: 65px">{{resp?.name ?? ""}}</p>
         <p class="info" style="left: 1090px; top: 120px">RATING</p>
         <p class="info" style="font-size: 32px;left: 1090px; top: 140px">{{resp?.rating}}</p>
-        <p class="info" style="left: 1090px; top: 1330px">DATA FROM</p>
-        <p class="info" style="font-size: 28px;left: 1090px; top: 1355px">{{dataFrom}}</p>
+        <!-- <p class="info" style="left: 1090px; top: 1330px">DATA FROM</p>
+        <p class="info" style="font-size: 28px;left: 1090px; top: 1355px">{{dataFrom}}</p> -->
     </div>
     <script type="importmap">
         {
@@ -185,12 +186,6 @@
         import { createApp, ref } from 'vue'
 
         window.app = createApp({
-            methods: {
-                getCoverPathById(i) {
-                    if (i > 10000 && i <= 11000) i -= 10000;
-                    return (i + "").padStart(5, '0') + ".png";
-                }
-            },
             data: () => ({
                 assetBase: '',
                 resp: null,
@@ -198,7 +193,8 @@
             }),
             setup() {
                 return {
-                    DIFF_COLORS: ['rgb(69, 193, 36)', 'rgb(255, 186, 1)', 'rgb(255, 90, 102)', 'rgb(134, 49, 200)', 'rgb(217, 197, 233)']
+                    DIFF_COLORS: ['rgb(69, 193, 36)', 'rgb(255, 186, 1)', 'rgb(255, 90, 102)', 'rgb(134, 49, 200)', 'rgb(217, 197, 233)'],
+                    LEVEL_LABELS: ["Basic", "Advanced", "Expert", "Master", "Re:MASTER"]
                 }
             }
         }).mount('#app')
