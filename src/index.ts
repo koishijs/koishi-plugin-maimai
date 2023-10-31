@@ -55,7 +55,7 @@ declare module 'koishi' {
 }
 
 export class Maimai extends Service {
-  static using = ['puppeteer']
+  static inject = ['puppeteer', 'router']
   logger: Logger
   // zetarakuData: {
   //   songs: Zetaraku.MaimaiDX.Music[]
