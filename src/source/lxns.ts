@@ -6,7 +6,7 @@ export class Lxns extends DataSource {
   async list() {
     let { songs } = await this.http.get<{
       songs: Lxns.MaimaiDX.Music[]
-    }>(`/v0/song/list`)
+    }>(`/song/list`)
 
     let result: Lxns.MaimaiDX.FlattenedMusic[] = []
     for (let music of songs) {
@@ -34,8 +34,8 @@ export class Lxns extends DataSource {
   }
 
   async b50(userId: string) {
-    const { data: player } = await this.http.get<Response<Lxns.MaimaiDX.UserInfo>>(`/v0/player/qq/${userId}`)
-    let { data } = await this.http.get<Response<Lxns.MaimaiDX.UserBest50>>(`/v0/player/${player.friend_code}/bests`)
+    const { data: player } = await this.http.get<Response<Lxns.MaimaiDX.UserInfo>>(`/player/qq/${userId}`)
+    let { data } = await this.http.get<Response<Lxns.MaimaiDX.UserBest50>>(`/player/${player.friend_code}/bests`)
     data.dx = data.dx.map(score => {
       const song = this.ctx.maimai.music.find(music => music.id % 10000 === score.id)
       return {
@@ -53,10 +53,10 @@ export class Lxns extends DataSource {
     return { ...data, ...player }
   }
   async score(qq: string, songs: Partial<DataSource.MaimaiDX.Music>[]) {
-    const { data: player } = await this.http.get<Response<Lxns.MaimaiDX.UserInfo>>(`/v0/player/qq/${qq}`)
+    const { data: player } = await this.http.get<Response<Lxns.MaimaiDX.UserInfo>>(`/player/qq/${qq}`)
     let result: DataSource.MaimaiDX.Score[] = []
     for (const song of songs) {
-      let { data } = await this.http.get<Response<DataSource.MaimaiDX.Score[]>>(`/v0/player/${player.friend_code}/bests`, {
+      let { data } = await this.http.get<Response<DataSource.MaimaiDX.Score[]>>(`/player/${player.friend_code}/bests`, {
         params: {
           song_id: song.id % 10000,
           song_type: song.type

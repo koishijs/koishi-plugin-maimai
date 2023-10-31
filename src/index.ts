@@ -36,7 +36,7 @@ export const Config: Schema<Config> = Schema.object({
   }),
   lxns: Schema.object({
     token: Schema.string().required(),
-    endpoint: Schema.string().role('link').default('https://maimai.lxns.net/api/').hidden(),
+    endpoint: Schema.string().role('link').default('https://maimai.lxns.net/api/v0/maimai/').hidden(),
   }),
   xray_alias: Schema.string().role('link').default('https://download.fanyu.site/maimai/alias.json').hidden(),
   yuzuai_alias: Schema.string().role('link').default('https://api.yuzuai.xyz/maimaidx/maimaidxalias').hidden(),
