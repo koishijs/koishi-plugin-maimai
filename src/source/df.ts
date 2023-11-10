@@ -1,7 +1,9 @@
 import { DataSource } from "./base";
+import { Lxns } from "./lxns";
 
 // @ts-ignore
 export class DivingFish extends DataSource {
+  id = "df"
   name = "水鱼查分器"
   async list() {
     let r = await this.http.get<DivingFish.MaimaiDX.Music[]>(`/api/maimaidxprober/music_data`)
@@ -30,22 +32,35 @@ export class DivingFish extends DataSource {
     return {
       id: song_id,
       song_name: old.title,
-      level: old.level_label,
+      level: old.level,
       level_index: old.level_index,
       achievements: old.achievements,
       fc: old.fc,
       fs: old.fs,
-      dx_rating: old.dxScore,
+      dx_rating: old.ra,
       dx_score: old.dxScore,
       rate: old.rate,
       type: old.type === 'DX' ? 'dx' : 'standard'
     }
   }
 
+  async score(userId: string, songs: Partial<Lxns.MaimaiDX.FlattenedMusic>[]): Promise<Lxns.MaimaiDX.Score[]> {
+    const response = await this.http.get<DivingFish.MaimaiDX.UserDev>(`/api/maimaidxprober/dev/player/records`, {
+      params: {
+        username: userId
+      },
+      headers: {
+        'developer-token': this.ctx.config.divingFish.token
+      },
+    });
+    return response.records.map(this.chartToStandard).filter(v => songs.map(v => v.id).includes(v.id));
+  }
+
   async b50(userId: string): Promise<DataSource.MaimaiDX.UserBest50> {
     const r = await this.http.post<DivingFish.MaimaiDX.UserBest40>(`/api/maimaidxprober/query/player`, {
       username: userId,
-      qq: userId
+      qq: userId,
+      b50: true
     });
     return {
       friend_code: -1,
@@ -55,6 +70,15 @@ export class DivingFish extends DataSource {
       standard: r.charts.sd.map(this.chartToStandard),
       name: r.nickname,
       rating: r.rating
+    }
+  }
+  cover(id: number) {
+    let _ = id % 10000
+    return {
+      filename: `${_.toString()}.png`,
+      uri: [
+        `https://www.diving-fish.com/covers/${id.toString().padStart(5, '0')}.png`,
+      ]
     }
   }
 }
@@ -77,6 +101,7 @@ export namespace DivingFish.MaimaiDX {
 
   export interface UserDev extends ApiMessage {
     additional_rating: number;
+    rating: number
     username: string;
     records: Chart[]
   }

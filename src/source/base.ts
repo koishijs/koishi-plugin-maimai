@@ -2,6 +2,7 @@ import { Context, Quester } from "koishi";
 import { Lxns } from "./lxns";
 
 export abstract class DataSource {
+  id: string
   superior = false
   name: string
   constructor(public ctx: Context, public http: Quester) {

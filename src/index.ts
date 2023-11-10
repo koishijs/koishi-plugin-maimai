@@ -26,27 +26,31 @@ export interface Config {
     token: string
     endpoint: string
   }
+  preferred: 'lxns' | 'df'
   quester: Quester.Config
 }
 
 export const Config: Schema<Config> = Schema.object({
   divingFish: Schema.object({
-    token: Schema.string(),
+    token: Schema.string().description('仅"查单曲分数"功能需要此 Token, 请联系水鱼获取'),
     endpoint: Schema.string().role('link').default('https://www.diving-fish.com/').hidden(),
   }),
   lxns: Schema.object({
-    token: Schema.string().required(),
+    token: Schema.string().description('接入落雪咖啡屋查分器时, 使用所有功能都需要此 Token, 请前往 [落雪咖啡屋](https://maimai.lxns.net) 获取'),
     endpoint: Schema.string().role('link').default('https://maimai.lxns.net/api/v0/maimai/').hidden(),
   }),
+  preferred: Schema.union([
+    Schema.const('lxns').description('落雪咖啡屋 maimai DX 查分器'),
+    Schema.const('df').description('水鱼查分器'),
+  ]).role('radio').description('首选 API').default('lxns'),
   xray_alias: Schema.string().role('link').default('https://download.fanyu.site/maimai/alias.json').hidden(),
   yuzuai_alias: Schema.string().role('link').default('https://api.yuzuai.xyz/maimaidx/maimaidxalias').hidden(),
   dev: Schema.boolean().default(false).hidden(),
   quester: Quester.Config
 })
 
-const logger = new Logger(name)
 
-export const using = ['puppeteer']
+export const inject = ['puppeteer', 'router']
 
 declare module 'koishi' {
   interface Context {
@@ -69,7 +73,7 @@ export class Maimai extends Service {
 
   sources: DataSource[] = []
   get preferred() {
-    return this.sources.find(v => v.superior)
+    return this.sources.find(v => v.id === this.config.preferred)
   }
 
   // toDivingFishData(input: Zetaraku.MaimaiDX.Music): DivingFish.MaimaiDX.Music {
@@ -102,7 +106,7 @@ export class Maimai extends Service {
 
   constructor(ctx: Context, config: Config) {
     super(ctx, 'maimai')
-    this.logger = new Logger('maimai')
+    this.logger = ctx.logger('maimai')
     this.config = config
     const N = 10
 
@@ -110,7 +114,7 @@ export class Maimai extends Service {
     if (this.config.dev) this.assetPrefix = "dev"
 
     this.assetBase = `http://127.0.0.1:${ctx.router.port}/${this.assetPrefix}/`;
-    logger.debug(this.assetBase)
+    this.logger.debug(this.assetBase)
 
     const dfHttp = ctx.http.extend({
       endpoint: config.divingFish.endpoint,
@@ -134,7 +138,7 @@ export class Maimai extends Service {
     // this.zetarakuData = await this.ctx.http.get<{
     //   songs: Zetaraku.MaimaiDX.Music[]
     // }>('https://dp4p6x0xfi5o9.cloudfront.net/maimai/data.json')
-    logger.info('fetching data from peferred data source')
+    this.logger.info('fetching data from peferred data source')
     // this.final = []
     this.music = await this.musicInfo()
 
@@ -153,7 +157,7 @@ export class Maimai extends Service {
 
     let idAlias = {}
     try {
-      logger.info('fetching data from xray alias')
+      this.logger.info('fetching data from xray alias')
       const alias = await this.ctx.http.get<{
         [key: string]: string[]
       }>(this.ctx.config.xray_alias)
@@ -161,7 +165,7 @@ export class Maimai extends Service {
         if (alias[key].length) idAlias[key] = [...new Set(alias[key])];
       }
     } catch (e) {
-      logger.error(e)
+      this.logger.error(e)
     }
     // try {
     //   logger.info('fetching data from yuzuai alias')
@@ -180,7 +184,7 @@ export class Maimai extends Service {
     //   logger.error(e)
     // }
     this.idAlias = idAlias
-    logger.info('finished')
+    this.logger.info('finished')
   }
 
   async updateData() {
@@ -190,7 +194,7 @@ export class Maimai extends Service {
         await this._updateData();
         break;
       } catch (e) {
-        logger.error(e)
+        this.logger.error(e)
         time++
         await new Promise(r => setTimeout(r, 1000))
       }
@@ -201,24 +205,6 @@ export class Maimai extends Service {
   async musicInfo() {
     return this.preferred.list()
   }
-
-  // async dev(developer_token: string, username?: string): Promise<{
-  //   username: string
-  //   records: DivingFish.MaimaiDX.Chart[]
-  //   additional_rating: number
-  // }> {
-  //   const response = await this.dfHttp.get(`/api/maimaidxprober/dev/player/records`, {
-  //     params: {
-  //       username
-  //     },
-  //     headers: {
-  //       'content-type': 'application/json',
-  //       'developer-token': developer_token
-  //     },
-  //   });
-
-  //   return response;
-  // }
 
 
   getPotentialSong(name: string) {
@@ -262,7 +248,7 @@ export class Maimai extends Service {
       })
       await writeFile(dist, Buffer.from(buffer))
     } catch (e) {
-      logger.error('%s %s', url, e.stack)
+      this.logger.error('%s %s', url, e.stack)
     }
   }
 
@@ -296,11 +282,11 @@ export class Maimai extends Service {
     let id = +_id > 10000 ? +_id - 10000 : +_id
     let path1 = resolve(this.ctx.baseDir, `data/maimai/covers-t2d/UI_Jacket_${id.toString().padStart(6, '0')}.png`)
     if (existsSync(path1)) {
-      logger.debug('use preloaded resource, %s', id)
+      this.logger.debug('use preloaded resource, %s', id)
       return `covers-t2d/UI_Jacket_${id.toString().padStart(6, '0')}.png`
     }
 
-    const { filename, uri } = this.preferred.cover(id)
+    const { filename, uri } = this.preferred.cover(+_id)
     let path2 = resolve(this.ctx.baseDir, `data/maimai/covers-id/${filename}`)
     if (existsSync(path2)) return `covers-id/${filename}`
 
@@ -313,8 +299,8 @@ export class Maimai extends Service {
         await writeFile(path2, Buffer.from(buffer))
         return `covers-id/${filename}`
       } catch (e) {
-        logger.error(`download image failed, %s`, remote)
-        logger.error(e)
+        this.logger.error(`download image failed, %s`, remote)
+        this.logger.error(e)
       }
     }
 
@@ -329,7 +315,7 @@ export class Maimai extends Service {
   }
 
   async start() {
-    await mkdir(resolve(this.ctx.baseDir, 'data/maimai/covers-zt'), { recursive: true })
+    // await mkdir(resolve(this.ctx.baseDir, 'data/maimai/covers-zt'), { recursive: true })
     await mkdir(resolve(this.ctx.baseDir, 'data/maimai/covers-id'), { recursive: true })
 
     this.ctx.router.get(`/${this.assetPrefix}/maimaidx/data/(.*)`, async (koaCtx) => {
@@ -369,7 +355,7 @@ export * from './source/base'
 
 export async function apply(ctx: Context, config: Config) {
   ctx.plugin(Maimai, config)
-  ctx.using(['maimai'], async (ctx) => {
+  ctx.inject(['maimai'], async (ctx) => {
     ctx.command('maimaidx.song-search <name:text>', '搜歌')
       .alias('搜索 <name>')
       .alias('搜歌 <name>')
@@ -421,7 +407,7 @@ export async function apply(ctx: Context, config: Config) {
 
     ctx.command('maimaidx.song-probe <name:text>', '什么分')
       .shortcut(/^(.*)(?:什么|多少)分$/, { args: ['$1'] })
-      // .option('user', '-u [username:string] 用户名')
+      .option('user', '-u [username:string] 用户名/好友码')
       .option('qid', '--qid [qid:string] QQ')
       .action(async ({ options, session }, name) => {
         let result = ctx.maimai.getPotentialSong(name)
@@ -434,7 +420,7 @@ export async function apply(ctx: Context, config: Config) {
           // b40 = await ctx.maimai.b40(options?.qid ?? session.userId, options?.user);
           list = await ctx.maimai.preferred.score(options.qid ?? session.userId, result);
         } catch (e) {
-          if (e.response.data.message) {
+          if (e.response?.data?.message) {
             return dedent`
               获取 B50 时出现错误: 
               ${e.response.data.message}
@@ -477,12 +463,12 @@ export async function apply(ctx: Context, config: Config) {
         try {
           b50 = await ctx.maimai.preferred.b50(options?.qid ?? session.userId);
         } catch (e) {
-          logger.error(e)
+          ctx.logger('maimai').error(e)
           if (e.response.data.message) {
             return dedent`
               获取 B50 时出现错误: 
               ${e.response.data.message}
-              请检查用户是否在 ${ctx.maimai.preferred.name} 查分器上绑定或用户名是否正确
+              请检查用户是否在 ${ctx.maimai.preferred.name} 上绑定或用户名是否正确
           `;
           }
         }
