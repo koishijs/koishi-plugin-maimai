@@ -22,7 +22,7 @@ export abstract class DataSource {
   }
 }
 
-const ratingTable = [
+export const ratingTable = [
   [0.0000, 0],
   [10.0000, 16],
   [20.0000, 32],

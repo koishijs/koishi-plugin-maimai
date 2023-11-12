@@ -10,7 +10,7 @@ import { mkdir, readFile, writeFile } from 'fs/promises';
 import { existsSync } from 'fs';
 
 import koaSend from 'koa-send';
-import { DataSource, calcRating } from './source/base';
+import { DataSource, calcRating, ratingTable } from './source/base';
 export const name = 'maimai'
 export * from './types'
 
@@ -567,63 +567,46 @@ export async function apply(ctx: Context, config: Config) {
         return aliases.join("\n")
       })
 
-    ctx.command('maimaidx.rating-calc <rating:number>', '计算 Rating', { checkArgCount: true })
+    ctx.command('maimaidx.rating-calc <ds:number> <ach:number>', '计算 Rating', { checkArgCount: true })
+      .check(({ }, ds, ach) => (ds < 0 || ds > 15 || ach < 0 || ach > 101) ? '?' : null)
+      .action(async ({ }, ds, ach) => {
+        return (calcRating(ds, ach) / 10).toString()
+      })
+
+    ctx.command('maimaidx.rating-list <ds:number>', '由定数列举 Rating', { checkArgCount: true })
       .shortcut(/定数\s*((?:1[0-5]|[1-9])(?:\.\d)?)\s*rating/, { args: ['$1'] })
       .action(async ({ }, ds) => {
-        const get_min_ach = (idx) => {
-          return [0, 50, 60, 70, 75, 80, 90, 94, 97, 98, 99, 99.5, 100, 100.5, 101][
-            idx
-          ];
-        }
-        let min_idx = 5;
-        let min_ach4 = Math.round(get_min_ach(min_idx) * 10000);
-        let max_idx = 13;
-        let max_ach4 = Math.round(get_min_ach(max_idx + 1) * 10000);
-        let more_ra = [];
-        const calc = (level: number, score: number) => Math.floor(
-          calcRating(level, score) / 10
-        )
-        for (
-          let curr_ach4 = min_ach4;
-          curr_ach4 < max_ach4;
-          curr_ach4 += 2500
-        ) {
-          // console.log(curr_ach4, JSON.stringify(more_ra));
-          let curr_min_ra = calc(ds, curr_ach4 / 10000);
-          if (curr_min_ra > calc(ds, (curr_ach4 - 1) / 10000)) {
-            more_ra.push({
-              ds: ds,
-              achievements: curr_ach4 / 10000,
-              rating: curr_min_ra,
-            });
-          }
+        function generateRatings(ds: number, ratingTable: number[][]) {
+          let result = [];
 
-          let curr_max_ra = calc(ds, (curr_ach4 + 2499) / 10000);
-          if (curr_max_ra > curr_min_ra) {
-            let l = curr_ach4,
-              r = curr_ach4 + 2499,
-              ans = r;
-            while (r >= l) {
-              let mid = Math.floor((r + l) / 2);
-              if (calc(ds, mid / 10000) > curr_min_ra) {
-                ans = mid;
-                r = mid - 1;
-              } else {
-                l = mid + 1;
+          for (let i = 0; i < ratingTable.length; i++) {
+            const [score, _] = ratingTable[i];
+            const ratingAtJump = calcRating(ds, score);
+            result.push([score, ratingAtJump]);
+
+            if (i < ratingTable.length - 1) {
+              const nextScore = ratingTable[i + 1][0];
+              const step = (score - nextScore) / 4;
+              if (step <= 0.001) continue
+              for (let j = 1; j <= 3; j++) {
+                const intermediateScore = score - step * j;
+                const intermediateRating = calcRating(ds, intermediateScore);
+                result.push([intermediateScore, intermediateRating]);
               }
             }
-            more_ra.push({
-              ds: ds,
-              achievements: ans / 10000,
-              rating: curr_max_ra,
-            });
           }
+
+          return result.sort((a, b) => b[0] - a[0]);
         }
-        let result = more_ra.sort((a, b) => b.achievements - a.achievements);
+
+        // 成绩, 计算后的分数
+        const result = generateRatings(ds, ratingTable.slice(0, 13)) // >= 80
+          .map(v => [Math.floor(v[0] * 1000) / 1000, Math.floor(v[1] / 10)])
+
         return ctx.puppeteer.render(`<html>
       <body style="width: 200px">
       <table style="width: 100%">
-      ${result.map(v => `<tr><td>${v.achievements}</td><td>${v.rating}</td></tr>`).join('')}
+      ${result.map(v => `<tr><td>${v[0]}</td><td>${v[1]}</td></tr>`).join('')}
       </table>
       </body>
       </html>`)
