@@ -254,17 +254,26 @@ export class Maimai extends Service {
 
 
   async drawBest50(b40: DataSource.MaimaiDX.UserBest50, dataFrom: string = "DIVING FISH") {
+    let b35Sugg = this.suggestions(b40.standard[b40.standard.length - 1].dx_rating)
+    let b15Sugg = this.suggestions(b40.dx[b40.dx.length - 1].dx_rating)
+    // console.log(b35Sugg, b15Sugg)
+    const suggestions = [
+      [`SSS+ ${b35Sugg[0]}`, `SSS ${b35Sugg[1]}`, `SS+ ${b35Sugg[2]}`],
+      [`SSS+ ${b15Sugg[0]}`, `SSS ${b15Sugg[1]}`, `SS+ ${b15Sugg[2]}`]
+    ]
     let page = await this.ctx.puppeteer.page();
     await page.goto(`${this.assetBase}maimaidx/assets/b50.html`)
     await page.setViewport({ ...page.viewport(), deviceScaleFactor: 1 })
-    await page.evaluate((data, assetBase, dataFrom) => {
+    await page.evaluate((data, assetBase, dataFrom, suggestions) => {
       // @ts-ignore
       window.app.resp = data
       // @ts-ignore
       window.app.assetBase = assetBase
       // @ts-ignore
       window.app.dataFrom = dataFrom
-    }, b40, this.assetBase, dataFrom)
+      // @ts-ignore
+      window.app.suggestions = suggestions
+    }, b40, this.assetBase, dataFrom, suggestions)
     const body = await page.$('body')
     const clip = await body.boundingBox()
 
@@ -348,6 +357,26 @@ export class Maimai extends Service {
       })
     })
     await this.updateData()
+  }
+
+  suggestions(bottom: number) {
+    let result = []
+    let flag1 = false, flag2 = false, flag3 = false
+    for (let i = 0; i <= 15; i += 0.1) {
+      if (Math.floor(calcRating(i, 100.5) / 10) > bottom && !flag1) {
+        result.push(i.toFixed(1))
+        flag1 = true
+      }
+      if (Math.floor(calcRating(i, 100) / 10) > bottom && !flag2) {
+        result.push(i.toFixed(1))
+        flag2 = true
+      }
+      if (Math.floor(calcRating(i, 99.5) / 10) > bottom && !flag3) {
+        result.push(i.toFixed(1))
+        flag3 = true
+      }
+    }
+    return result
   }
 }
 
