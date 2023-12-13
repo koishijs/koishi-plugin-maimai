@@ -131,6 +131,9 @@ export class Maimai extends Service {
     const lxns = new Lxns(ctx, lxHttp)
     this.sources.push(df)
     this.sources.push(lxns)
+    this.ctx.inject(['maimai'], (ctx) => {
+      this.sources.forEach(v => v.ctx = ctx)
+    })
   }
 
   async _updateData() {
@@ -390,8 +393,27 @@ export async function apply(ctx: Context, config: Config) {
       .alias('搜歌 <name>')
       .alias('search <name>')
       .shortcut(/^(.*?)是?什么歌$/, { args: ['$1'] })
-      .action(async ({ }, name) => {
-        let result = ctx.maimai.getPotentialSong(name)
+      .action(async ({ session }, name) => {
+        let result = ctx.maimai.getPotentialSong(name.trim())
+        if (name.trim().match(/^#\d+/)) {
+          const matched = parseInt(name.trim().match(/^#(\d+)/)[1])
+          if (matched >= 1 && matched <= 35) {
+            let b50: DataSource.MaimaiDX.UserBest50;
+            try {
+              b50 = await ctx.maimai.preferred.b50(session.userId);
+            } catch (e) { }
+            if (b50) {
+              const song1 = b50.standard[matched - 1], song2 = b50.dx[matched - 1]
+              if (song1) {
+                // @TODO score to song function
+                result.push(ctx.maimai.music.find(v => v.id % 10000 === song1.id && v.type === song1.type))
+              }
+              if (song2) {
+                result.push(ctx.maimai.music.find(v => v.id % 10000 === song2.id && v.type === song2.type))
+              }
+            }
+          }
+        }
         if (!result.length) {
           return '妹这样的歌啊';
         }

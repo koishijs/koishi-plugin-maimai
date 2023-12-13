@@ -11,7 +11,7 @@ export class Lxns extends DataSource {
     let result: Lxns.MaimaiDX.FlattenedMusic[] = []
     for (let music of songs) {
       const { difficulties, ...rest } = music
-      if (difficulties.dx.length) {
+      if (difficulties.dx?.length) {
 
         result = result.concat({
           type: "dx",
@@ -20,7 +20,7 @@ export class Lxns extends DataSource {
           difficulties: difficulties.dx
         })
       }
-      if (difficulties.standard.length) {
+      if (difficulties.standard?.length) {
 
         result = result.concat({
           type: "standard",
@@ -37,19 +37,19 @@ export class Lxns extends DataSource {
     const { data: player } = await this.http.get<Response<Lxns.MaimaiDX.UserInfo>>(`/player/qq/${userId}`)
     let { data } = await this.http.get<Response<Lxns.MaimaiDX.UserBest50>>(`/player/${player.friend_code}/bests`)
     data.dx = data.dx.map(score => {
-      const song = this.ctx.maimai.music.find(music => music.id % 10000 === score.id)
+      const song = this.ctx.maimai.music.find(music => music.id % 10000 === score.id && music.type === score.type)
       return {
         ...score,
         level: song.difficulties[score.level_index].level_value.toString()
       }
     })
     data.standard = data.standard.map(score => {
-      const song = this.ctx.maimai.music.find(music => music.id % 10000 === score.id)
+      const song = this.ctx.maimai.music.find(music => music.id % 10000 === score.id && music.type === score.type)
       return {
         ...score,
         level: song.difficulties[score.level_index].level_value.toString()
       }
-    })
+        })
     return { ...data, ...player }
   }
   async score(qq: string, songs: Partial<DataSource.MaimaiDX.Music>[]) {
