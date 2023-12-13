@@ -1,7 +1,7 @@
 {
   "name": "koishi-plugin-maimai",
   "description": "舞萌 DX 功能插件",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [
@@ -31,7 +31,8 @@
     }
   },
   "peerDependencies": {
-    "koishi": "^4.15.4"
+    "@koishijs/plugin-server": "*",
+    "koishi": "^4.16.0"
   },
   "dependencies": {
     "dedent": "^1.5.1",

@@ -1,6 +1,7 @@
 import { Context, Logger, Quester, Schema, Service, h, segment } from 'koishi'
 import type { } from 'koishi-plugin-puppeteer'
 import type { } from '@koishijs/plugin-help'
+import type { } from '@koishijs/plugin-server'
 import { DivingFish } from './source/df';
 import { Lxns } from './source/lxns';
 import dedent from "dedent";
