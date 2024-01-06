@@ -6,9 +6,9 @@ import { resolve } from 'path';
 import { DataSource, calcRating } from './source/base';
 import { DivingFish } from './source/df';
 import { Lxns } from './source/lxns';
-import { Config } from '.';
+import { Config } from './index';
 import koaSend from 'koa-send'
-
+import type { } from '@koishijs/plugin-server'
 
 export class Maimai extends Service {
   static inject = ['puppeteer', 'server'];
