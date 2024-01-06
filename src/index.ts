@@ -1,7 +1,6 @@
 import { Context, Quester, Schema, h, segment } from 'koishi'
 import type { } from 'koishi-plugin-puppeteer'
 import type { } from '@koishijs/plugin-help'
-import type { } from '@koishijs/plugin-server'
 import dedent from "dedent";
 import { resolve } from 'path';
 import { DataSource, calcRating, ratingTable } from './source/base';
@@ -59,11 +58,13 @@ export async function apply(ctx: Context, config: Config) {
   ctx.plugin(Maimai, config)
   ctx.inject(['maimai'], async (ctx) => {
     ctx.command('maimaidx.song-search <name:text>', '搜歌')
-      .alias('搜索 <name>')
-      .alias('搜歌 <name>')
-      .alias('search <name>')
+      .alias('搜索')
+      .alias('搜歌')
+      .alias('search')
       .shortcut(/^(.*?)是?什么歌$/, { args: ['$1'] })
       .action(async ({ session }, name) => {
+        if (session.quote) name = name.slice(session.content.length).trim()
+        if (!name) return ''
         let result = ctx.maimai.getPotentialSong(name.trim())
         if (name.trim().match(/^#\d+/)) {
           const matched = parseInt(name.trim().match(/^#(\d+)/)[1])
@@ -244,7 +245,7 @@ export async function apply(ctx: Context, config: Config) {
     //   })
 
     ctx.command('maimaidx.alias-search <name:text>', '查询别名')
-      .alias('查询别名 <name>')
+      .alias('查询别名')
       .action(async ({ }, name) => {
         let result = ctx.maimai.getPotentialSong(name)
         if (!result.length) {
