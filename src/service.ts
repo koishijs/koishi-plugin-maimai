@@ -240,6 +240,7 @@ export class Maimai extends Service {
       clip,
       type: "png"
     });
+    await page.close()
     return r;
   }
 

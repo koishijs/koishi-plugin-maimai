@@ -123,6 +123,7 @@ export async function apply(ctx: Context, config: Config) {
           type: "png"
         })
         // console.timeEnd('ppt')
+        await page.close()
         return [result.map(v => v.title).join('\n'), h.image(r, 'image/png')]
       });
 
