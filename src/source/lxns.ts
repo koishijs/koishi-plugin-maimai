@@ -2,7 +2,7 @@ import { DataSource } from "./base";
 
 export class Lxns extends DataSource {
   id = "lxns"
-  name = "maimai.lxns.net"
+  name = "落雪查分器"
   async list() {
     let { songs } = await this.http.get<{
       songs: Lxns.MaimaiDX.Music[]
