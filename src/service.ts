@@ -210,13 +210,15 @@ export class Maimai extends Service {
 
 
   async drawBest50(b40: DataSource.MaimaiDX.UserBest50, dataFrom: string = "DIVING FISH") {
-    let b35Sugg = this.suggestions(b40.standard[b40.standard.length - 1].dx_rating);
-    let b15Sugg = this.suggestions(b40.dx[b40.dx.length - 1].dx_rating);
-    // console.log(b35Sugg, b15Sugg)
-    const suggestions = [
-      [`SSS+ ${b35Sugg[0]}`, `SSS ${b35Sugg[1]}`, `SS+ ${b35Sugg[2]}`],
-      [`SSS+ ${b15Sugg[0]}`, `SSS ${b15Sugg[1]}`, `SS+ ${b15Sugg[2]}`]
-    ];
+    let suggestions: Dict<string[]> = {};
+    if (b40.standard.length) {
+      let b35Sugg = this.suggestions(b40.standard[b40.standard.length - 1].dx_rating);
+      suggestions['b35'] = [`SSS+ ${b35Sugg[0]}`, `SSS ${b35Sugg[1]}`, `SS+ ${b35Sugg[2]}`]
+    }
+    if (b40.dx.length) {
+      let b15Sugg = this.suggestions(b40.dx[b40.dx.length - 1].dx_rating);
+      suggestions['b15'] = [`SSS+ ${b15Sugg[0]}`, `SSS ${b15Sugg[1]}`, `SS+ ${b15Sugg[2]}`]
+    }
     let page = await this.ctx.puppeteer.page();
     await page.goto(`${this.assetBase}maimaidx/assets/b50.html`);
     await page.setViewport({ ...page.viewport(), deviceScaleFactor: 1 });
