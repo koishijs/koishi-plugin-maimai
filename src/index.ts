@@ -63,7 +63,7 @@ export async function apply(ctx: Context, config: Config) {
       .alias('search')
       .shortcut(/^(.*?)是?什么歌$/, { args: ['$1'] })
       .action(async ({ session }, name) => {
-        if (session.quote) name = name.slice(session.content.length).trim()
+        if (session.quote) return ''
         if (!name) return ''
         let result = ctx.maimai.getPotentialSong(name.trim())
         if (name.trim().match(/^#\d+/)) {
