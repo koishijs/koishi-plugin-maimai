@@ -240,7 +240,8 @@ export class Maimai extends Service {
     });
     let r = await page.screenshot({
       clip,
-      type: "png"
+      type: "jpeg",
+      quality: 90
     });
     await page.close()
     return r;

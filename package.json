@@ -1,7 +1,7 @@
 {
   "name": "koishi-plugin-maimai",
   "description": "舞萌 DX 功能插件",
-  "version": "2.2.5",
+  "version": "2.2.6",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [
@@ -10,6 +10,10 @@
     "assets"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/koishijs/koishi-plugin-maimai.git"
+  },
   "keywords": [
     "chatbot",
     "koishi",
@@ -31,7 +35,7 @@
     }
   },
   "peerDependencies": {
-    "koishi": "^4.16.7"
+    "koishi": "^4.16.8"
   },
   "devDependencies": {
     "@koishijs/plugin-server": "^3.1.7"
