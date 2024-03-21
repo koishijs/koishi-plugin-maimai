@@ -38,7 +38,7 @@ export const Config: Schema<Config> = Schema.object({
     Schema.const('df').description('水鱼查分器'),
   ]).role('radio').description('首选 API').default('lxns'),
   xray_alias: Schema.string().role('link').default('https://download.fanyu.site/maimai/alias.json').hidden(),
-  yuzuai_alias: Schema.string().role('link').default('https://api.yuzuai.xyz/maimaidx/maimaidxalias').hidden(),
+  yuzuai_alias: Schema.string().role('link').default('https://api.yuzuchan.moe/maimaidx/maimaidxalias').hidden(),
   dev: Schema.boolean().default(false).hidden(),
   quester: Quester.Config
 })
