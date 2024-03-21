@@ -6,7 +6,7 @@ export class Lxns extends DataSource {
   async list() {
     let { songs } = await this.http.get<{
       songs: Lxns.MaimaiDX.Music[]
-    }>(`/song/list`)
+    }>(`/song/list?notes=true`)
 
     let result: Lxns.MaimaiDX.FlattenedMusic[] = []
     for (let music of songs) {
@@ -121,6 +121,14 @@ export namespace Lxns.MaimaiDX {
     level_value: number
     note_designer: string
     version?: number
+    notes: {
+      total: number
+      tap: number
+      hold: number
+      slide: number
+      touch: number
+      break: number
+    }
   }
   export interface Music {
     id: number;

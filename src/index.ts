@@ -61,7 +61,7 @@ export async function apply(ctx: Context, config: Config) {
       .alias('搜索')
       .alias('搜歌')
       .alias('search')
-      .shortcut(/^(.*?)是?什么歌$/, { args: ['$1'] })
+      .shortcut(/^(.*?)[是事]?什么歌$/, { args: ['$1'] })
       .action(async ({ session }, name) => {
         if (session.quote) return ''
         if (!name) return ''
@@ -247,6 +247,7 @@ export async function apply(ctx: Context, config: Config) {
     ctx.command('maimaidx.alias-search <name:text>', '查询别名')
       .alias('查询别名')
       .action(async ({ }, name) => {
+        if (!name) return `请在指令后加入要查询的别名, 例: /查询别名 弱虫`
         let result = ctx.maimai.getPotentialSong(name)
         if (!result.length) {
           return '妹这样的歌啊';

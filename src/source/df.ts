@@ -22,7 +22,15 @@ export class DivingFish extends DataSource {
         difficulty: i,
         level: old.level[i],
         level_value: old.ds[i],
-        note_designer: v.charter
+        note_designer: v.charter,
+        notes: {
+          tap: v.notes[0],
+          hold: v.notes[1],
+          slide: v.notes[2],
+          touch: old.type === 'DX' ? v.notes[3] : 0,
+          break: old.type === 'DX' ? v.notes[4] : v.notes[3],
+          total: v.notes.reduce((a, b) => a + b, 0)
+        }
       }))
     }
   }
