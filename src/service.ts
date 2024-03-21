@@ -212,12 +212,10 @@ export class Maimai extends Service {
   async drawBest50(b40: DataSource.MaimaiDX.UserBest50, dataFrom: string = "DIVING FISH") {
     let suggestions: Dict<string[]> = {};
     if (b40.standard.length) {
-      let b35Sugg = this.suggestions(b40.standard[b40.standard.length - 1].dx_rating);
-      suggestions['b35'] = [`SSS+ ${b35Sugg[0]}`, `SSS ${b35Sugg[1]}`, `SS+ ${b35Sugg[2]}`]
+      suggestions['b35'] = this.suggestions(b40.standard[b40.standard.length - 1].dx_rating)
     }
     if (b40.dx.length) {
-      let b15Sugg = this.suggestions(b40.dx[b40.dx.length - 1].dx_rating);
-      suggestions['b15'] = [`SSS+ ${b15Sugg[0]}`, `SSS ${b15Sugg[1]}`, `SS+ ${b15Sugg[2]}`]
+      suggestions['b15'] = this.suggestions(b40.dx[b40.dx.length - 1].dx_rating)
     }
     let page = await this.ctx.puppeteer.page();
     await page.goto(`${this.assetBase}maimaidx/assets/b50.html`);
@@ -291,7 +289,7 @@ export class Maimai extends Service {
       const filename = koaCtx.request.url.slice(`/${this.assetPrefix}/maimaidx/data`.length);
       return koaSend(koaCtx, filename, {
         root: resolve(this.ctx.baseDir, './data/maimai/'),
-        immutable: true
+        // immutable: true
       });
     });
     this.ctx.server.get(`/${this.assetPrefix}/maimaidx/covers/:id.png`, async (koaCtx) => {
@@ -300,12 +298,12 @@ export class Maimai extends Service {
         let localFilename = await this.ensureCover(id);
         return koaSend(koaCtx, localFilename, {
           root: resolve(this.ctx.baseDir, './data/maimai/'),
-          immutable: true
+          // immutable: true
         });
       } catch (e) {
         return koaSend(koaCtx, 'UI_Jacket_000000.png', {
           root: resolve(__dirname, '../assets'),
-          immutable: true
+          // immutable: true
         });
       }
     });
@@ -313,7 +311,7 @@ export class Maimai extends Service {
       const filename = koaCtx.request.url.slice(`/${this.assetPrefix}/maimaidx/assets`.length);
       return koaSend(koaCtx, filename, {
         root: resolve(__dirname, '../assets'),
-        immutable: true
+        // immutable: true
       });
     });
     await this.updateData();
@@ -323,16 +321,16 @@ export class Maimai extends Service {
     let result = [];
     let flag1 = false, flag2 = false, flag3 = false;
     for (let i = 0; i <= 15; i += 0.1) {
-      if (Math.floor(calcRating(i, 100.5) / 10) > bottom && !flag1) {
-        result.push(i.toFixed(1));
+      if ((Math.floor(calcRating(i, 100.5) / 10) - bottom) >= 1 && !flag1) {
+        result.push(`SSS+ ${i.toFixed(1)}`);
         flag1 = true;
       }
-      if (Math.floor(calcRating(i, 100) / 10) > bottom && !flag2) {
-        result.push(i.toFixed(1));
+      if ((Math.floor(calcRating(i, 100) / 10) - bottom) >= 1 && !flag2) {
+        result.push(`SSS ${i.toFixed(1)}`);
         flag2 = true;
       }
-      if (Math.floor(calcRating(i, 99.5) / 10) > bottom && !flag3) {
-        result.push(i.toFixed(1));
+      if ((Math.floor(calcRating(i, 99.5) / 10) - bottom) >= 1 && !flag3) {
+        result.push(`SS+ ${i.toFixed(1)}`);
         flag3 = true;
       }
     }
