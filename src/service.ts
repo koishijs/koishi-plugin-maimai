@@ -1,7 +1,7 @@
 import { existsSync } from 'fs';
 import { writeFile, mkdir } from 'fs/promises';
 import { Service, Quester, Context, Logger, Dict } from 'koishi';
-import { uniq } from 'lodash';
+import uniq from 'lodash.uniq'
 import { resolve } from 'path';
 import { DataSource, calcRating } from './source/base';
 import { DivingFish } from './source/df';
