@@ -125,9 +125,9 @@ export class Maimai extends Service {
     }
     try {
       this.logger.info('fetching data from yuzuai alias')
-      let tmp = await this.ctx.http.get<{
+      let tmp = (await this.ctx.http.get<{
         [key: string]: { Name: string; Alias: string[] }
-      }>(this.config.yuzuai_alias)
+      }>(this.config.yuzuai_alias)).content
       for (const key of Object.keys(tmp)) {
         if (tmp[key].Alias.length) {
           for (const alias of tmp[key].Alias.filter(al => al !== tmp[key].Name)) {
